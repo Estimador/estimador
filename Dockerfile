@@ -22,6 +22,9 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
+# Verificar la instalación de Chrome
+RUN google-chrome-stable --version
+
 # Crear un directorio de trabajo
 WORKDIR /usr/src/app
 
@@ -33,9 +36,6 @@ RUN npm ci
 
 # Copiar el resto de los archivos de la aplicación
 COPY . .
-
-# Configurar la variable de entorno para Puppeteer
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # Exponer el puerto en el que se ejecutará la aplicación
 EXPOSE 3000
