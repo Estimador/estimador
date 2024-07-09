@@ -1,19 +1,12 @@
-FROM alekzonder/puppeteer:latest
+FROM ghcr.io/puppeteer/puppeteer:22.12.1
 
-# Crear un directorio de trabajo
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
 WORKDIR /usr/src/app
 
-# Copiar package.json y package-lock.json
 COPY package*.json ./
-
-# Instalar dependencias
 RUN npm ci
-
-# Copiar el resto de los archivos de la aplicación
 COPY . .
-
-# Exponer el puerto en el que se ejecutará la aplicación
-EXPOSE 3000
-
-# Comando para ejecutar la aplicación
 CMD [ "node", "index.js" ]
+
