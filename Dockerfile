@@ -1,29 +1,4 @@
-FROM node:16
-
-# Instalar dependencias necesarias
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
-    procps \
-    libxss1 \
-    libxtst6 \
-    libxshmfence1 \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libgtk-3-0 \
-    libgbm1 \
-    libasound2
-
-# Descargar e instalar Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
-
-# Verificar la instalación de Chrome
-RUN google-chrome-stable --version
+FROM alekzonder/puppeteer:latest
 
 # Crear un directorio de trabajo
 WORKDIR /usr/src/app
