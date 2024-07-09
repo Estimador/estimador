@@ -1,8 +1,8 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.get('/consulta', async (req, res) => {
   const { patente, provincia, valorDeclarado } = req.query;
