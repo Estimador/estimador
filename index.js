@@ -1,5 +1,5 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 const app = express();
 const port = 3000;
@@ -13,7 +13,7 @@ app.get('/consulta', async (req, res) => {
 
   try {
 const browser = await puppeteer.launch({
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+  executablePath: '/usr/bin/google-chrome-stable',
   args: ['--no-sandbox', '--disable-setuid-sandbox']
 });
     const page = await browser.newPage();
