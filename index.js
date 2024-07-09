@@ -1,8 +1,7 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-
+const express = require("express"); 
 const app = express();
-const port = process.env.PORT || 3000;
+
+const PORT = process.env.PORT || 4000;
 
 app.get('/consulta', async (req, res) => {
   const { patente, provincia, valorDeclarado } = req.query;
@@ -12,16 +11,18 @@ app.get('/consulta', async (req, res) => {
   }
 
   try {
-const browser = await puppeteer.launch({
-  headless: "new",
-  args: [
-    "--disable-setuid-sandbox",
-    "--no-sandbox",
-    "--single-process",
-    "--no-zygote",
-  ],
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable',
-});
+  const browser = await puppeteer.launch({
+    args: [
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+  });
     const page = await browser.newPage();
 
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
@@ -81,6 +82,10 @@ const browser = await puppeteer.launch({
   }
 });
 
-app.listen(port, () => {
-  console.log(`API escuchando en http://localhost:${port}`);
+app.get("/", (req, res) => {
+  res.send("Render Puppeteer server is up and running!");
+});
+
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });
