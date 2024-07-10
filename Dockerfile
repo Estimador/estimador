@@ -1,31 +1,36 @@
-# Ejemplo de Dockerfile para una aplicación Node.js en Render
-
-# Usando una imagen base de Node.js
 FROM node:latest
 
-# Instalando dependencias del sistema
-RUN apt-get update && \
-    apt-get install -y \
-        libicu-dev \
-        libevent-dev \
-        libjpeg-dev \
-        libenchant-dev \
-        libsecret-1-0 \
-        libffi-dev \
-        libgles2 \
-        # etc.
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libatspi2.0-0
 
-# Configurando el directorio de trabajo de la aplicación
 WORKDIR /usr/src/app
 
-# Copiando los archivos de la aplicación
-COPY . .
+COPY package*.json ./
 
-# Instalando las dependencias de Node.js
 RUN npm install
 
-# Configurando la variable de entorno para Playwright
-ENV PLAYWRIGHT_BROWSERS_PATH=/opt/render/.cache/ms-playwright/
+COPY . .
 
-# Comando por defecto para iniciar la aplicación
+# Instalar Playwright y sus navegadores
+RUN npx playwright install-deps
+RUN npx playwright install
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/src/app/node_modules/playwright/.cache/playwright
+
 CMD ["npm", "start"]
