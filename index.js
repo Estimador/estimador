@@ -4,13 +4,12 @@ const { chromium } = require('playwright');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/consulta', async (req, res) => {
-  const { patente, provincia, valorDeclarado } = req.query;
+const MAX_RETRIES = 3;
+const WAIT_TIMEOUT = 120000; // 2 minutos
 
-  if (!patente || !provincia || !valorDeclarado) {
-    return res.status(400).json({ error: 'Patente, provincia y valor declarado son requeridos' });
-  }
-
+async function consultaConRetry(patente, provincia, valorDeclarado, retryCount = 0) {
+  console.log(`Intento ${retryCount + 1} de ${MAX_RETRIES}`);
+  
   try {
     console.log('Iniciando el navegador...');
     const browser = await chromium.launch({
@@ -28,11 +27,11 @@ app.get('/consulta', async (req, res) => {
     const page = await context.newPage();
 
     console.log('Navegando a la página del estimador...');
-    await page.goto('https://www2.jus.gov.ar/dnrpa-site/#!/estimador', { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto('https://www2.jus.gov.ar/dnrpa-site/#!/estimador', { waitUntil: 'networkidle', timeout: WAIT_TIMEOUT });
     console.log('Página cargada');
 
     console.log('Esperando selector #codigoTramite...');
-    await page.waitForSelector('#codigoTramite', { state: 'visible', timeout: 60000 });
+    await page.waitForSelector('#codigoTramite', { state: 'visible', timeout: WAIT_TIMEOUT });
     console.log('Selector #codigoTramite encontrado');
 
     console.log('Seleccionando opción "TRANSFERENCIA"...');
@@ -47,8 +46,11 @@ app.get('/consulta', async (req, res) => {
     await page.click('button[type="submit"]');
 
     console.log('Esperando resultados...');
-    await page.waitForSelector('.container-fluid.margin-20', { timeout: 60000 });
+    await page.waitForSelector('.container-fluid.margin-20', { timeout: WAIT_TIMEOUT });
     console.log('Resultados cargados');
+
+    // Añadir un pequeño retraso para asegurar que los resultados se han cargado completamente
+    await page.waitForTimeout(5000);
 
     console.log('Extrayendo resultados...');
     const result = await page.evaluate(() => {
@@ -67,14 +69,36 @@ app.get('/consulta', async (req, res) => {
     console.log('Cerrando navegador...');
     await browser.close();
 
-    console.log('Enviando respuesta...');
+    return result;
+  } catch (error) {
+    console.error(`Error durante la consulta (intento ${retryCount + 1}):`, error);
+    
+    if (retryCount < MAX_RETRIES - 1) {
+      console.log(`Reintentando en 5 segundos...`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return consultaConRetry(patente, provincia, valorDeclarado, retryCount + 1);
+    } else {
+      throw error;
+    }
+  }
+}
+
+app.get('/consulta', async (req, res) => {
+  const { patente, provincia, valorDeclarado } = req.query;
+
+  if (!patente || !provincia || !valorDeclarado) {
+    return res.status(400).json({ error: 'Patente, provincia y valor declarado son requeridos' });
+  }
+
+  try {
+    const result = await consultaConRetry(patente, provincia, valorDeclarado);
     res.json(result);
   } catch (error) {
-    console.error('Error durante la consulta:', error);
+    console.error('Error final después de todos los intentos:', error);
     if (error.name === 'TimeoutError') {
-      res.status(504).json({ error: 'Tiempo de espera excedido al cargar la página' });
+      res.status(504).json({ error: 'Tiempo de espera excedido al cargar la página después de múltiples intentos' });
     } else {
-      res.status(500).json({ error: 'Error al consultar los datos' });
+      res.status(500).json({ error: 'Error al consultar los datos después de múltiples intentos' });
     }
   }
 });
