@@ -1,24 +1,31 @@
-# Usa la imagen base adecuada para tu aplicación (por ejemplo, Node.js)
-FROM node:14
+# Ejemplo de Dockerfile para una aplicación Node.js en Render
 
-# Establece el directorio de trabajo dentro del contenedor
+# Usando una imagen base de Node.js
+FROM node:latest
+
+# Instalando dependencias del sistema
+RUN apt-get update && \
+    apt-get install -y \
+        libicu-dev \
+        libevent-dev \
+        libjpeg-dev \
+        libenchant-dev \
+        libsecret-1-0 \
+        libffi-dev \
+        libgles2 \
+        # etc.
+
+# Configurando el directorio de trabajo de la aplicación
 WORKDIR /usr/src/app
 
-# Copia el package.json y package-lock.json (si lo tienes) al directorio de trabajo
-COPY package*.json ./
-
-# Instala las dependencias de tu aplicación
-RUN npm install
-
-# Instala Playwright y los navegadores necesarios (Chromium, Firefox, Webkit)
-RUN npx playwright install
-
-# Copia el resto de tu aplicación al directorio de trabajo
+# Copiando los archivos de la aplicación
 COPY . .
 
-# Expón el puerto en el que tu aplicación expone servicios
-EXPOSE 3000
+# Instalando las dependencias de Node.js
+RUN npm install
 
-# Comando para ejecutar tu aplicación cuando el contenedor se inicie
-CMD [ "node", "src/index.js" ]
+# Configurando la variable de entorno para Playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/render/.cache/ms-playwright/
 
+# Comando por defecto para iniciar la aplicación
+CMD ["npm", "start"]
