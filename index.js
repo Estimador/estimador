@@ -79,9 +79,9 @@ async function consultaConRetry(patente, provincia, valorDeclarado, retryCount =
       const additionalInfo = {
         marca: document.querySelector('tr.success td.ng-binding')?.innerText.trim() || null,
         modelo: document.querySelector('tr.success td.ng-binding:nth-child(4)')?.innerText.trim() || null,
-        tipo: document.querySelector('tr.success:nth-of-type(2) td.ng-binding')?.innerText.trim() || null,
+        tipo: document.querySelector('tr.success:nth-of-type(2) td.ng-binding:nth-child(2)')?.innerText.trim() || null,
         provinciaRadicacion: document.querySelector('tr td.ng-binding:nth-child(4)')?.innerText.trim() || null,
-        anioOrigen: document.querySelector('tr.success:nth-of-type(2) td.ng-binding:nth-child(4)')?.innerText.trim() || null,
+        anioOrigen: document.querySelector('tr.success:nth-of-type(2) td.ng-binding:last-child')?.innerText.trim() || null,
         valorTabla: document.querySelector('tr.success:nth-of-type(3) td.ng-binding')?.innerText.trim() || null
       };
     
