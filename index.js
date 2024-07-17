@@ -63,6 +63,7 @@ async function consultaConRetry(patente, provincia, valorDeclarado, retryCount =
     // Añadir un pequeño retraso para asegurar que los resultados se han cargado completamente
     await page.waitForTimeout(5000);
 
+    
     console.log('Extrayendo resultados...');
     const result = await page.evaluate(() => {
       const items = Array.from(document.querySelectorAll('div[ng-repeat="item in presupuestoCtrl.presupuesto.DetallePrecioPrecargaViewModel"]')).map(item => ({
@@ -71,10 +72,20 @@ async function consultaConRetry(patente, provincia, valorDeclarado, retryCount =
         quantity: item.querySelector('.col-xs-2.col-sm-2.text-right')?.innerText.trim() || null,
         total: item.querySelector('.col-xs-2.col-sm-2.text-right')?.innerText.trim() || null,
       }));
-
+    
       const totalPrice = document.querySelector('.container-fluid.margin-20 .row.alert-info.presupuesto-row .col-xs-12.text-right strong.ng-binding')?.innerText.trim() || null;
-
-      return { items, totalPrice };
+    
+      // Extraer información adicional
+      const additionalInfo = {
+        marca: document.querySelector('tr.success td.ng-binding')?.innerText.trim() || null,
+        modelo: document.querySelector('tr.success td.ng-binding:nth-child(4)')?.innerText.trim() || null,
+        tipo: document.querySelector('tr.success:nth-of-type(2) td.ng-binding')?.innerText.trim() || null,
+        provinciaRadicacion: document.querySelector('tr td.ng-binding:nth-child(4)')?.innerText.trim() || null,
+        anioOrigen: document.querySelector('tr.success:nth-of-type(2) td.ng-binding:nth-child(4)')?.innerText.trim() || null,
+        valorTabla: document.querySelector('tr.success:nth-of-type(3) td.ng-binding')?.innerText.trim() || null
+      };
+    
+      return { items, totalPrice, additionalInfo };
     });
 
     console.log('Cerrando navegador...');
