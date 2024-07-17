@@ -37,9 +37,20 @@ async function consultaConRetry(patente, provincia, valorDeclarado, retryCount =
     console.log('Seleccionando opción "TRANSFERENCIA"...');
     await page.selectOption('#codigoTramite', 'string:08xxxx');
 
+    console.log('Esperando que los campos del formulario estén listos...');
+    await page.waitForSelector('input#dominio', { state: 'visible', timeout: WAIT_TIMEOUT });
+    await page.waitForSelector('input[name="valorDeclarado"]', { state: 'visible', timeout: WAIT_TIMEOUT });
+    await page.waitForSelector('#codigoProvincia', { state: 'visible', timeout: WAIT_TIMEOUT });
+
     console.log('Llenando campos del formulario...');
     await page.fill('input#dominio', patente);
-    await page.fill('input[name="valorDeclarado"]', valorDeclarado);
+    
+    // Intentar llenar el campo valorDeclarado usando evaluate
+    await page.evaluate((valor) => {
+      document.querySelector('input[name="valorDeclarado"]').value = valor;
+      angular.element(document.querySelector('input[name="valorDeclarado"]')).triggerHandler('input');
+    }, valorDeclarado);
+
     await page.selectOption('#codigoProvincia', 'string:' + provincia);
 
     console.log('Enviando formulario...');
