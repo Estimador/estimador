@@ -76,14 +76,26 @@ async function consultaConRetry(patente, provincia, valorDeclarado, retryCount =
       const totalPrice = document.querySelector('.container-fluid.margin-20 .row.alert-info.presupuesto-row .col-xs-12.text-right strong.ng-binding')?.innerText.trim() || null;
     
       // Extraer información adicional
-      const additionalInfo = {
-        marca: document.querySelector('tr.success td.ng-binding')?.innerText.trim() || null,
-        modelo: document.querySelector('tr.success td.ng-binding:nth-child(4)')?.innerText.trim() || null,
-        tipo: document.querySelector('tr.success:nth-of-type(2) td.ng-binding:nth-child(2)')?.innerText.trim() || null,
-        provinciaRadicacion: document.querySelector('tr td.ng-binding:nth-child(4)')?.innerText.trim() || null,
-        anioOrigen: document.querySelector('tr.success:nth-of-type(2) td.ng-binding:last-child')?.innerText.trim() || null,
-        valorTabla: document.querySelector('tr.success:nth-of-type(3) td.ng-binding')?.innerText.trim() || null
-      };
+  const additionalInfo = {
+    marca: document.querySelector('tr.success td.ng-binding')?.innerText.trim() || null,
+    modelo: document.querySelector('tr.success td.ng-binding:nth-child(4)')?.innerText.trim() || null,
+    tipo: (() => {
+      const el = document.querySelector('tr.success:nth-of-type(2) td.ng-binding');
+      console.log('Elemento tipo:', el?.outerHTML);
+      return el?.innerText.trim() || null;
+    })(),
+    provinciaRadicacion: document.querySelector('tr:not(.success) td.ng-binding:nth-child(4)')?.innerText.trim() || null,
+    anioOrigen: (() => {
+      const el = document.querySelector('tr.success:nth-of-type(2) td.ng-binding:nth-child(4)');
+      console.log('Elemento año/origen:', el?.outerHTML);
+      return el?.innerText.trim() || null;
+    })(),
+    valorTabla: (() => {
+      const el = document.querySelector('tr.success:last-of-type td.ng-binding');
+      console.log('Elemento valorTabla:', el?.outerHTML);
+      return el?.innerText.trim() || null;
+    })()
+  };
     
       return { items, totalPrice, additionalInfo };
     });
