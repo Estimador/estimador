@@ -1,0 +1,29 @@
+[build]
+  # Base directory where Netlify installs dependencies and runs your build command
+  base = ""
+
+  # Directory that contains your site files, including the netlify.toml
+  # Set this only if it's different from the base directory
+  # package directory here refers to the root of your project
+  # replace with the correct directory if it's not the root
+  package = ""
+
+  # Build command to run your application
+  # In your case, start script is used to run your application
+  command = "npm start"
+
+  # Directory that contains your compiled functions
+  # If your functions are in a different directory, specify it here
+  functions = "netlify/functions"
+
+  # Publish directory where the built app files are located
+  publish = ""
+
+[[plugins]]
+  package = "netlify-plugin-playwright"
+
+# Example configuration if you are building a monorepo
+#[[build]]
+#  base = "packages/site"
+#  command = "npm run build"
+#  publish = "packages/site/build"
